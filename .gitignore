@@ -7,6 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Node / frontend build output
 node_modules
 dist
 dist-ssr
@@ -15,10 +16,26 @@ dist-ssr
 .tanstack/**
 .nitro
 *.local
+.vite
 
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
+
+# Python / backend
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+*.db
+*.sqlite
+*.sqlite3
 
 # Editor directories and files
 .vscode/*

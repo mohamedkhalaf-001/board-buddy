@@ -1,4 +1,8 @@
-# Kanban Board — Project Scope (v1)
+# Board Buddy — Project Spec (v1)
+
+> Single source of truth for the Kanban board's requirements, data model,
+> API surface, and acceptance criteria. See also `README.md` for structure
+> and running instructions.
 
 ## Overview
 
@@ -11,18 +15,19 @@ frontend (React) talking to a local API (FastAPI) backed by SQLite.
 
 ## Tech Stack
 
-| Layer        | Choice                                  |
-|--------------|-----------------------------------------|
-| Frontend     | React + TypeScript, Vite               |
-| Backend      | Python FastAPI                          |
-| Database     | SQLite (file-based, local)              |
-| Drag & drop  | React DnD library (e.g. `@dnd-kit/core`)|
-| Run target   | Localhost only (single command to start)|
-| Distribution | Single-user, single board. No auth.     |
+| Layer        | Choice                                   |
+|--------------|------------------------------------------|
+| Frontend     | React + TypeScript, Vite (TanStack Start)|
+| Backend      | Python FastAPI                           |
+| Database     | SQLite (file-based, local)               |
+| Drag & drop  | React DnD library (`@dnd-kit/core`)      |
+| Run target   | Localhost only (single command to start) |
+| Distribution | Single-user, single board. No auth.      |
 
-Same-language caveats / decisions:
-- Frontend and backend are separate processes in dev; backend serves the built
-  frontend statically so one command runs the whole app in production mode.
+Decisions / caveats:
+- Frontend and backend are separate processes in dev; the backend serves the
+  built frontend statically so one command runs the whole app in production
+  mode.
 
 ---
 
@@ -91,7 +96,8 @@ Same-language caveats / decisions:
 ### WIP limits
 - Per-column max card count.
 - Column visually warns when at/near limit; card drop into a full column is
-  either blocked or flagged (configurable at scaffold time — default: warn + allow).
+  either blocked or flagged (configurable at scaffold time — default:
+  warn + allow).
 
 ### Swimlanes
 - Horizontal rows (e.g. "High / Mid / Low urgency").
@@ -109,6 +115,10 @@ Same-language caveats / decisions:
 ### Activity log
 - Side panel showing recent board events (created, moved, labeled, deleted...)
 - Pulled from `ActivityLogEntry`.
+
+### Responsive layout
+- Board renders with no horizontal scrollbar at any viewport width.
+- Columns scale (`minmax(0, 1fr)` grid) to always fit the available width.
 
 ---
 
@@ -135,7 +145,6 @@ Command types (each serialized with enough payload to reverse):
 - Multi-user, authentication, roles, or real-time collaboration.
 - Multiple boards / board templates / sharing.
 - Attachments, comments, checklists, sub-tasks/story points.
-- Mobile-focused responsive design (should degrade acceptably, not optimized).
 - Cloud deployment, CI/CD, Docker.
 - Import/export to external tools (CSV/JSON export is a possible v2).
 
@@ -148,6 +157,7 @@ Command types (each serialized with enough payload to reverse):
 - All v1 features work end-to-end through the UI.
 - Undo/redo works across refresh.
 - Activity log records every card/column/swimlane/label mutation.
+- No horizontal scrollbar at any screen size.
 - Browsers: latest Chrome/Firefox/Edge.
 
 ---
