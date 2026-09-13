@@ -53,7 +53,7 @@ export function ColumnHeader({ column, count, run, onAddCard }: Props) {
       ref={setNodeRef}
       style={{ transform: CSS.Translate.toString(transform), transition }}
       className={cn(
-        "flex items-center gap-1.5 rounded-xl border border-border bg-elevated px-2.5 py-2",
+        "flex min-w-0 items-center gap-1.5 rounded-xl border border-border bg-elevated px-2.5 py-2",
         isDragging && "opacity-50",
       )}
     >

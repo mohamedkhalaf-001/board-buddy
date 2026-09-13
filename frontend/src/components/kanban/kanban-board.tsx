@@ -73,7 +73,7 @@ function Cell({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex min-h-28 flex-col gap-2 rounded-xl border border-dashed border-transparent p-2 transition-colors",
+        "flex min-h-28 min-w-0 flex-col gap-2 rounded-xl border border-dashed border-transparent p-2 transition-colors",
         isOver && "border-primary/50 bg-primary/5",
         full && "bg-destructive/5",
       )}
@@ -217,7 +217,7 @@ export function KanbanBoard() {
   };
 
   const gridStyle = {
-    gridTemplateColumns: `repeat(${Math.max(columns.length, 1)}, minmax(272px, 1fr))`,
+    gridTemplateColumns: `repeat(${Math.max(columns.length, 1)}, minmax(0, 1fr))`,
   };
 
   const addColumn = () => {
@@ -234,14 +234,14 @@ export function KanbanBoard() {
       <header className="flex flex-wrap items-center gap-2 border-b border-border bg-sidebar px-4 py-3">
         <h1 className="mr-2 text-lg font-semibold">Kanban</h1>
 
-        <div className="relative">
+        <div className="relative min-w-0 flex-1 sm:flex-none">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             ref={searchRef}
             value={filters.text}
             onChange={(e) => setFilters((f) => ({ ...f, text: e.target.value }))}
             placeholder="Search cards…  ( / )"
-            className="h-9 w-56 pl-8"
+            className="h-9 w-full pl-8 sm:w-56"
           />
         </div>
 
@@ -354,7 +354,7 @@ export function KanbanBoard() {
           </Button>
         )}
 
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-1">
           <Button variant="ghost" size="icon" className="size-9" disabled={!canUndo} onClick={undo}>
             <Undo2 className="size-4" /><span className="sr-only">Undo</span>
           </Button>
@@ -378,7 +378,7 @@ export function KanbanBoard() {
       </header>
 
       <div className="flex min-h-0 flex-1">
-        <main className="scrollbar-slim min-w-0 flex-1 overflow-auto p-4">
+        <main className="scrollbar-slim min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4">
           {isLoading ? (
             <p className="text-sm text-muted-foreground">Loading board…</p>
           ) : (
@@ -389,7 +389,7 @@ export function KanbanBoard() {
               onDragEnd={onDragEnd}
               onDragCancel={() => setActiveCard(null)}
             >
-              <div className="min-w-max">
+              <div className="min-w-0">
                 <SortableContext
                   items={columns.map((c) => `column:${c.id}`)}
                   strategy={horizontalListSortingStrategy}

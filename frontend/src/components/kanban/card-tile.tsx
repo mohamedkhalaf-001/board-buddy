@@ -30,7 +30,7 @@ export function CardTile({ card, labels, onOpen, dragging, overlay }: Props) {
       type="button"
       onClick={() => onOpen(card)}
       className={cn(
-        "group w-full rounded-xl border border-border bg-card p-3 text-left shadow-card transition-all",
+        "group w-full min-w-0 rounded-xl border border-border bg-card p-3 text-left shadow-card transition-all",
         "hover:-translate-y-px hover:border-primary/40 hover:shadow-lift focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         dragging && "opacity-40",
         overlay && "rotate-2 shadow-lift",
@@ -49,7 +49,7 @@ export function CardTile({ card, labels, onOpen, dragging, overlay }: Props) {
           ))}
         </div>
       )}
-      <p className="text-sm font-medium leading-snug text-card-foreground">{card.title}</p>
+      <p className="text-sm font-medium leading-snug break-words text-card-foreground">{card.title}</p>
       {(card.description || card.dueDate) && (
         <div className="mt-2.5 flex items-center gap-3 text-xs text-muted-foreground">
           {card.description && <AlignLeft className="size-3.5" aria-hidden />}
@@ -79,6 +79,7 @@ export function SortableCardTile(props: Props) {
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Translate.toString(transform), transition }}
+      className="min-w-0"
       {...attributes}
       {...listeners}
     >
