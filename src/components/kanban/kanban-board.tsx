@@ -162,7 +162,7 @@ export function KanbanBoard() {
 
   const onDragStart = (e: DragStartEvent) => {
     const data = e.active.data.current;
-    if (data?.type === "card") setActiveCard(data.card as Card);
+    if (data?.["type"] === "card") setActiveCard(data["card"] as Card);
   };
 
   const onDragEnd = (e: DragEndEvent) => {
@@ -170,25 +170,25 @@ export function KanbanBoard() {
     const { active, over } = e;
     if (!over) return;
 
-    if (active.data.current?.type === "column") {
+    if (active.data.current?.["type"] === "column") {
       const overId = String(over.id);
       if (!overId.startsWith("column:")) return;
       const toIndex = columns.findIndex((c) => `column:${c.id}` === overId);
-      const columnId = active.data.current.columnId as string;
-      if (toIndex >= 0 && columns[toIndex].id !== columnId)
+      const columnId = active.data.current["columnId"] as string;
+      if (toIndex >= 0 && columns[toIndex]!.id !== columnId)
         run("reorder_column", { id: columnId, toIndex });
       return;
     }
 
-    const card = active.data.current?.card as Card | undefined;
+    const card = active.data.current?.["card"] as Card | undefined;
     if (!card) return;
 
     let laneId: string;
     let columnId: string;
     let toIndex: number;
 
-    if (over.data.current?.type === "card") {
-      const target = over.data.current.card as Card;
+    if (over.data.current?.["type"] === "card") {
+      const target = over.data.current["card"] as Card;
       laneId = target.swimlaneId;
       columnId = target.columnId;
       toIndex = cardsInCell(board, laneId, columnId, filters).findIndex(
@@ -196,8 +196,8 @@ export function KanbanBoard() {
       );
     } else if (String(over.id).startsWith("cell:")) {
       const [, lane, col] = String(over.id).split(":");
-      laneId = lane;
-      columnId = col;
+      laneId = lane!;
+      columnId = col!;
       toIndex = cardsInCell(board, laneId, columnId, filters).length;
     } else {
       return;

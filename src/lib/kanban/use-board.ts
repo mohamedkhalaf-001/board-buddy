@@ -19,8 +19,8 @@ export function useBoard() {
   };
 
   const commandMutation = useMutation({
-    mutationFn: ({ type, payload }: { type: CommandType; payload?: Record<string, unknown> }) =>
-      api.postCommand(type, payload ?? {}),
+    mutationFn: ({ type, payload }: { type: CommandType; payload: Record<string, unknown> }) =>
+      api.postCommand(type, payload),
     onSuccess: (res) => {
       qc.setQueryData(["board"], res.board);
       refreshSide();
@@ -53,7 +53,7 @@ export function useBoard() {
     isLoading: boardQuery.isLoading,
     activity: activityQuery.data ?? [],
     run: (type: CommandType, payload?: Record<string, unknown>) =>
-      commandMutation.mutate({ type, payload }),
+      commandMutation.mutate({ type, payload: payload ?? {} }),
     undo: () => undoMutation.mutate(),
     redo: () => redoMutation.mutate(),
     canUndo: commands.some((c) => !c.undoApplied),

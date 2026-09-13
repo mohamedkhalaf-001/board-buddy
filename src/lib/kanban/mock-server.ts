@@ -189,7 +189,7 @@ function apply(board: BoardState, type: CommandType, p: any): Applied {
     case "reorder_column": {
       const ordered = board.columns.slice().sort(byPos);
       const from = ordered.findIndex((c) => c.id === p.id);
-      const [moved] = ordered.splice(from, 1);
+      const [moved] = ordered.splice(from, 1) as [typeof ordered[number]];
       ordered.splice(p.toIndex, 0, moved);
       renumber(ordered);
       return { summary: `Column "${moved.name}" reordered`, action: "moved", entityType: "column", entityId: p.id };
@@ -225,7 +225,7 @@ function apply(board: BoardState, type: CommandType, p: any): Applied {
     case "reorder_swimlane": {
       const ordered = board.swimlanes.slice().sort(byPos);
       const from = ordered.findIndex((s) => s.id === p.id);
-      const [moved] = ordered.splice(from, 1);
+      const [moved] = ordered.splice(from, 1) as [typeof ordered[number]];
       ordered.splice(p.toIndex, 0, moved);
       renumber(ordered);
       return { summary: `Swimlane "${moved.name}" reordered`, action: "moved", entityType: "swimlane", entityId: p.id };
