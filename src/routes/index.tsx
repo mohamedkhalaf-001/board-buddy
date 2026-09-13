@@ -1,24 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
-export const Route = createFileRoute("/")({
-  component: Index,
-});
+import { KanbanBoard } from "@/components/kanban/kanban-board";
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
+export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Kanban Board — Plan, move, ship" },
+      {
+        name: "description",
+        content:
+          "A single-board Kanban app with swimlanes, labels, WIP limits, due dates, search, undo/redo and a full activity log.",
+      },
+      { property: "og:title", content: "Kanban Board — Plan, move, ship" },
+      {
+        property: "og:description",
+        content:
+          "Drag cards across columns and swimlanes, filter by label or due date, and undo anything.",
+      },
+    ],
+  }),
+  component: KanbanBoard,
+});
