@@ -1,0 +1,31 @@
+[project]
+name = "kanban-backend"
+version = "0.1.0"
+description = "Board Buddy Kanban backend — FastAPI + SQLite (mock DB for now). See ../_docs/openapi.yaml"
+readme = "README.md"
+authors = [
+    { name = "mohamedkhalaf-001", email = "mr.mohamedkhalaf023@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.141.1",
+    "uvicorn[standard]>=0.52.4",
+]
+
+[project.scripts]
+kanban-backend = "kanban_backend:main"
+
+[build-system]
+requires = ["uv_build>=0.12.13,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+    "ruff>=0.16.7",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "DTZ", "RUF"]
+ignore = ["B008"]

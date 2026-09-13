@@ -1,0 +1,304 @@
+openapi: 3.1.0
+info:
+  title: Board Buddy API
+  version: 1.0.0
+  description: |
+    Single-user Kanban board API. All state is derived from an append-only
+    command log, which also powers undo/redo. Response shapes match the
+    frontend client (`frontend/src/lib/kanban/api.ts` and `types.ts`).
+tags:
+  - name: Board
+    description: Read the full board state
+  - name: Commands
+    description: Apply mutating commands, undo/redo
+  - name: Activity
+    description: Board mutation history
+paths:
+  /api/board:
+    get:
+      tags: [Board]
+      operationId: getBoard
+      summary: Full board state
+      responses:
+        "200":
+          description: Current board state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Board"
+  /api/commands:
+    get:
+      tags: [Commands]
+      operationId: getCommands
+      summary: Command history
+      description: Returns every stored command (newest first). Used to know what can be redone.
+      responses:
+        "200":
+          description: Command list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Command"
+    post:
+      tags: [Commands]
+      operationId: postCommand
+      summary: Apply a board command
+      description: Applies a mutating command and records it in the log. Undone (redoable) commands are discarded first.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommandRequest"
+      responses:
+        "200":
+          description: Resulting board state and the new command id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommandResult"
+        "400":
+          $ref: "#/components/responses/Error"
+  /api/commands/undo:
+    post:
+      tags: [Commands]
+      operationId: undoCommand
+      summary: Undo the most recent command
+      responses:
+        "200":
+          description: Board state after undo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Board"
+        "409":
+          $ref: "#/components/responses/Error"
+  /api/commands/redo:
+    post:
+      tags: [Commands]
+      operationId: redoCommand
+      summary: Redo the most recently undone command
+      responses:
+        "200":
+          description: Board state after redo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Board"
+        "409":
+          $ref: "#/components/responses/Error"
+  /api/activity:
+    get:
+      tags: [Activity]
+      operationId: getActivity
+      summary: Recent board activity
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Max entries to return (cap 200).
+          schema:
+            type: integer
+            default: 50
+            maximum: 200
+      responses:
+        "200":
+          description: Activity entries, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityLogEntry"
+  /api/reset:
+    post:
+      tags: [Board]
+      operationId: resetBoard
+      summary: Reset to seed data (mock convenience)
+      responses:
+        "200":
+          description: Fresh seeded board state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Board"
+components:
+  responses:
+    Error:
+      description: Client or state conflict error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    Error:
+      type: object
+      required: [detail]
+      properties:
+        detail:
+          type: string
+    ID:
+      type: string
+      description: Server-assigned or client-provided identifier.
+    Board:
+      type: object
+      required: [columns, swimlanes, labels, cards]
+      properties:
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/Column"
+        swimlanes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Swimlane"
+        labels:
+          type: array
+          items:
+            $ref: "#/components/schemas/Label"
+        cards:
+          type: array
+          items:
+            $ref: "#/components/schemas/Card"
+    Column:
+      type: object
+      required: [id, name, position, wipLimit]
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        name:
+          type: string
+        position:
+          type: integer
+        wipLimit:
+          type: [integer, "null"]
+          description: Max cards allowed in this column (null = no limit).
+    Swimlane:
+      type: object
+      required: [id, name, position]
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        name:
+          type: string
+        position:
+          type: integer
+    Label:
+      type: object
+      required: [id, name, color]
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        name:
+          type: string
+        color:
+          type: string
+          description: Hex color code.
+    Card:
+      type: object
+      required:
+        [id, title, description, columnId, swimlaneId, position, dueDate, labelIds, createdAt, updatedAt]
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        title:
+          type: string
+        description:
+          type: string
+        columnId:
+          $ref: "#/components/schemas/ID"
+        swimlaneId:
+          $ref: "#/components/schemas/ID"
+        position:
+          type: integer
+        dueDate:
+          type: [string, "null"]
+          format: date
+        labelIds:
+          type: array
+          items:
+            $ref: "#/components/schemas/ID"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CommandType:
+      type: string
+      enum:
+        - create_column
+        - rename_column
+        - delete_column
+        - reorder_column
+        - set_wip_limit
+        - create_swimlane
+        - rename_swimlane
+        - delete_swimlane
+        - reorder_swimlane
+        - create_card
+        - update_card
+        - delete_card
+        - move_card
+        - create_label
+        - rename_label
+        - delete_label
+        - assign_label
+        - remove_label
+    CommandRequest:
+      type: object
+      required: [type]
+      properties:
+        type:
+          $ref: "#/components/schemas/CommandType"
+        payload:
+          type: object
+          additionalProperties: true
+          description: Command payload, validated against the command type (see _docs/specs.md).
+    Command:
+      type: object
+      required: [id, type, payload, appliedAt, undoApplied]
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        type:
+          $ref: "#/components/schemas/CommandType"
+        payload:
+          type: object
+          additionalProperties: true
+        appliedAt:
+          type: string
+          format: date-time
+        undoApplied:
+          type: boolean
+    CommandResult:
+      type: object
+      required: [board, commandId]
+      properties:
+        board:
+          $ref: "#/components/schemas/Board"
+        commandId:
+          $ref: "#/components/schemas/ID"
+    ActivityAction:
+      type: string
+      enum: [created, updated, moved, deleted, label-added, label-removed, undo, redo]
+    ActivityLogEntry:
+      type: object
+      required: [id, action, entityType, entityId, summary, createdAt]
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        action:
+          $ref: "#/components/schemas/ActivityAction"
+        entityType:
+          type: string
+          enum: [card, column, swimlane, label, board]
+        entityId:
+          $ref: "#/components/schemas/ID"
+        summary:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
