@@ -1,13 +1,12 @@
 /**
- * API client. Today every call is served by the in-browser mock server.
- * Swap `USE_MOCK` to false (and set VITE_API_URL) once FastAPI is running —
- * the paths and payloads below already match the planned API surface.
+ * API client for the FastAPI backend (see ../_docs/openapi.yaml).
+ * Defaults to the same-origin `/api` prefix (Vite dev server proxies it to
+ * the backend on 127.0.0.1:8000). Override with VITE_API_URL if you need a
+ * different base, e.g. VITE_API_URL=http://127.0.0.1:8000/api.
  */
-import { mockServer } from "./mock-server";
 import type { ActivityLogEntry, BoardState, Command, CommandType } from "./types";
 
-const USE_MOCK = true;
-const BASE = "/api";
+const BASE = import.meta.env["VITE_API_URL"] ?? "/api";
 
 async function http<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
@@ -21,19 +20,17 @@ async function http<T>(path: string, init?: RequestInit): Promise<T> {
 export const api = {
   /** GET /api/board */
   getBoard(): Promise<BoardState> {
-    return USE_MOCK ? mockServer.getBoard() : http<BoardState>("/board");
+    return http<BoardState>("/board");
   },
 
   /** GET /api/commands */
   getCommands(): Promise<Command[]> {
-    return USE_MOCK ? mockServer.getCommands() : http<Command[]>("/commands");
+    return http<Command[]>("/commands");
   },
 
   /** GET /api/activity */
   getActivity(limit = 50): Promise<ActivityLogEntry[]> {
-    return USE_MOCK
-      ? mockServer.getActivity(limit)
-      : http<ActivityLogEntry[]>(`/activity?limit=${limit}`);
+    return http<ActivityLogEntry[]>(`/activity?limit=${limit}`);
   },
 
   /** POST /api/commands */
@@ -41,22 +38,21 @@ export const api = {
     type: CommandType,
     payload: Record<string, unknown> = {},
   ): Promise<{ board: BoardState; commandId: string }> {
-    return USE_MOCK
-      ? mockServer.postCommand(type, payload)
-      : http("/commands", { method: "POST", body: JSON.stringify({ type, payload }) });
+    return http("/commands", { method: "POST", body: JSON.stringify({ type, payload }) });
   },
 
-  /** POST /api/commands/{id}/undo */
+  /** POST /api/commands/undo */
   undo(): Promise<BoardState> {
-    return USE_MOCK ? mockServer.undo() : http("/commands/undo", { method: "POST" });
+    return http("/commands/undo", { method: "POST" });
   },
 
-  /** POST /api/commands/{id}/redo */
+  /** POST /api/commands/redo */
   redo(): Promise<BoardState> {
-    return USE_MOCK ? mockServer.redo() : http("/commands/redo", { method: "POST" });
+    return http("/commands/redo", { method: "POST" });
   },
 
+  /** POST /api/reset */
   reset(): Promise<BoardState> {
-    return mockServer.reset();
+    return http("/reset", { method: "POST" });
   },
 };
